@@ -1,8 +1,5 @@
 <?php
-$host = 'localhost';
-$dbname = 'todo_app';
-$username = 'root';
-$password = ''; // Par défaut vide sur XAMPP
+require_once 'conf.php';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);

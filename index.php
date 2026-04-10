@@ -1,63 +1,37 @@
 <?php 
-// 1. CONNEXION À LA BASE
-// On appelle le fichier db.php qui contient le PDO
-require 'db.php';
+require_once 'config/connexion.php';
 
-// 4. SUPPRIMER UNE TÂCHE
-// On regarde si "suppr" est dans l'adresse URL (ex: index.php?suppr=5)
+// SUPPRIMER
 if (isset($_GET['suppr'])) {
-    $id_a_supprimer = $_GET['suppr'];
-    
-    // REQUÊTE PRÉPARÉE pour la sécurité
-    $delete = $pdo->prepare("DELETE FROM taches WHERE id = ?");
-    $delete->execute([$id_a_supprimer]);
-    
-    // On recharge la page pour que la tâche disparaisse de la liste
+    $pdo->prepare("DELETE FROM taches WHERE id = ?")->execute([$_GET['suppr']]);
     header("Location: index.php");
     exit();
 }
 
-// 2. AJOUTER UNE TÂCHE
+// AJOUTER
 if (isset($_POST['ajouter'])) {
-    $t = $_POST['titre'];
-    $d = $_POST['description'];
-    $p = $_POST['priorite'];
-    $s = $_POST['statut'];
+    $t = $_POST['titre']; $d = $_POST['description'];
+    $p = $_POST['priorite']; $s = $_POST['statut'];
     $dt = $_POST['date_limite'];
 
     if ($t != "") {
-        // REQUÊTE PRÉPARÉE (Obligatoire pour la prof)
-        // Les "?" évitent que quelqu'un pirate la BDD via le formulaire
         $sql = "INSERT INTO taches (titre, description, priorite, statut, date_limite) VALUES (?, ?, ?, ?, ?)";
-        $req = $pdo->prepare($sql);
-        $req->execute([$t, $d, $p, $s, $dt]);
-        
+        $pdo->prepare($sql)->execute([$t, $d, $p, $s, $dt]);
         header("Location: index.php");
         exit();
     }
 }
 
-// 3. AFFICHER LES TÂCHES (Le SELECT)
-$req_affichage = $pdo->query("SELECT * FROM taches ORDER BY priorite DESC");
-$taches = $req_affichage->fetchAll();
+// RECUPERER
+$taches = $pdo->query("SELECT * FROM taches ORDER BY priorite DESC")->fetchAll();
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="utf-8">
-    <title>Mon App de Taches</title>
-    <style>
-        /* CSS IDENTIQUE - ON NE TOUCHE À RIEN */
-        body { font-family: Arial; margin: 20px; background-color: #f0f0f0; }
-        .mon-formulaire { background: white; padding: 15px; border: 1px solid #ccc; margin-bottom: 20px; }
-        .tache-ligne { background: white; border-bottom: 1px solid #999; }
-        .urgent { color: red; font-weight: bold; }
-        table { width: 100%; border: 1px solid black; background: white; }
-        th { background: #eee; }
-        td { padding: 8px; }
-        .filtre-box { margin-bottom: 10px; }
-    </style>
+    <title>Ma Todo List</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -94,7 +68,7 @@ $taches = $req_affichage->fetchAll();
         </select>
     </div>
 
-    <table border="1">
+    <table>
         <thead>
             <tr>
                 <th>Quoi ?</th>
@@ -104,44 +78,22 @@ $taches = $req_affichage->fetchAll();
                 <th>Supprimer</th>
             </tr>
         </thead>
-        <tbody id="le_tableau">
-            <?php foreach ($taches as $ligne): ?>
-            <tr class="tache-ligne" data-statut="<?= $ligne['statut'] ?>">
-                <td class="<?= ($ligne['priorite'] == 'haute') ? 'urgent' : '' ?>">
-                    <strong><?= htmlspecialchars($ligne['titre']) ?></strong> <br>
-                    <small><?= htmlspecialchars($ligne['description']) ?></small>
+        <tbody>
+            <?php foreach ($taches as $l): ?>
+            <tr class="tache-ligne" data-statut="<?= $l['statut'] ?>">
+                <td class="<?= ($l['priorite'] == 'haute') ? 'urgent' : '' ?>">
+                    <strong><?= htmlspecialchars($l['titre']) ?></strong><br>
+                    <small><?= htmlspecialchars($l['description']) ?></small>
                 </td>
-                <td><?= $ligne['priorite'] ?></td>
-                <td><?= $ligne['date_limite'] ?></td>
-                <td><?= $ligne['statut'] ?></td>
-                <td>
-                    <a href="index.php?suppr=<?= $ligne['id'] ?>" onclick="return confirm('Sûr ?')">X</a>
-                </td>
+                <td><?= $l['priorite'] ?></td>
+                <td><?= $l['date_limite'] ?></td>
+                <td><?= $l['statut'] ?></td>
+                <td><a href="index.php?suppr=<?= $l['id'] ?>" onclick="return confirm('Sûr ?')">X</a></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 
-    <script>
-        // JS pour le titre vide et le filtre (identique au précédent)
-        const f = document.getElementById('form_ajout');
-        f.onsubmit = function(event) {
-            const t = document.getElementById('id_titre').value;
-            if (t == "") {
-                alert("Mec, met un titre stp");
-                event.preventDefault();
-            }
-        };
-
-        const select = document.getElementById('mon_filtre');
-        select.onchange = function() {
-            const val = this.value;
-            const trs = document.querySelectorAll('.tache-ligne');
-            for (let i = 0; i < trs.length; i++) {
-                const s = trs[i].getAttribute('data-statut');
-                trs[i].style.display = (val == "toutes" || s == val) ? "" : "none";
-            }
-        };
-    </script>
+    <script src="js/script.js"></script>
 </body>
 </html>

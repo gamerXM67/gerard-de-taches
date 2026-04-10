@@ -1,0 +1,19 @@
+body { font-family: Arial; margin: 20px; background-color: #f0f0f0; }
+
+.mon-formulaire { 
+    background: white; 
+    padding: 15px; 
+    border: 1px solid #ccc; 
+    margin-bottom: 20px; 
+    border-radius: 8px; 
+    text-align: center; 
+}
+
+.tache-ligne { background: white; border-bottom: 1px solid #999; }
+.urgent { color: red; font-weight: bold; }
+
+table { width: 100%; border-collapse: collapse; border: 1px solid black; background: white; }
+th { background: #eee; padding: 10px; border: 1px solid #000; }
+td { padding: 8px; border: 1px solid #ccc; }
+
+.filtre-box { margin-bottom: 10px; text-align: center; }
